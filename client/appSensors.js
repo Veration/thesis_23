@@ -9,7 +9,7 @@ const contract = new web3.eth.Contract(configuration.abi, configuration.networks
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { addTemperatureValue, addHumidityValue, times } = require('../server/app');
+const {accounts, addTemperatureValue, addHumidityValue} = require('../server/utils');
 
 app.use(cors());
 app.use(express.json());
@@ -17,24 +17,38 @@ app.use(express.json());
 let cnt1 = 0;
 let cnt2 = 0;
 
-const tempInterval = setInterval(async () => {
-  if (cnt1 > 99){
-    clearInterval(tempInterval);
-    return;
-  }
-  let theTimeT = await addTemperatureValue(process.argv[2]);
-  // times.push(theTimeT);
-  console.log(theTimeT + " " + cnt1);
-  cnt1 += 1;
-} , 60000);
+const myIndex = process.argv[2];
+console.log('MyIndex: ' + myIndex);
 
-const humInterval = setInterval(async () => {
-  if (cnt2 > 99){
-    clearInterval(humInterval);
-    return;
-  }
-  let theTimeH = await addHumidityValue(process.argv[2]);
-  // times.push(theTimeH);
-  console.log(theTimeH + " " + cnt2);
-  cnt2 += 1;
-} , 60000);
+let times = [];
+
+const timeout = 1000;
+
+(async function () {
+  accountsList = await accounts();
+  const myAccount = accountsList[myIndex];
+  console.log(myAccount);
+
+  const tempInterval = setInterval(async () => {
+    if (cnt1 > 99) {
+      clearInterval(tempInterval);
+      return;
+    }
+    let theTimeT = await addTemperatureValue(myIndex, myAccount);
+    // times.push(theTimeT);
+    console.log(theTimeT + " " + cnt1);
+    cnt1 += 1;
+  }, timeout);
+
+  const humInterval = setInterval(async () => {
+    if (cnt2 > 99) {
+      clearInterval(humInterval);
+      return;
+    }
+    let theTimeH = await addHumidityValue(myIndex, myAccount);
+    // times.push(theTimeH);
+    console.log(theTimeH + " " + cnt2);
+    cnt2 += 1;
+  }, timeout);
+
+})();
