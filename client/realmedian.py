@@ -4,10 +4,12 @@ import math
 from time import sleep
 import matplotlib.pyplot as plt
 import re
+import statistics
 
 time = [num for num in range(1, 101)] # x axis
 per_accounts_median = {} # dict of median arrays to represent the different lines (for different number of writing accounts), y axis
 delays = {} # dictionary of arrays of delays
+variances = {} # dictionary of arrays of delays
 
 for i in range(1, 11):
     print(f'running bash parallel.sh {i}')
@@ -16,6 +18,7 @@ for i in range(1, 11):
     print(f"Number of accounts writing to blockchain: {accounts_used}")
     if i not in per_accounts_median:
         per_accounts_median[i] = []
+        variances[i] = []
     # parse all lines outputed from the script running the write operations
     for line in iter(process.stdout.readline, ''):
         try:
@@ -37,25 +40,14 @@ for i in range(1, 11):
 
     for k in range(100):
         delays[k].sort()
+        variance = statistics.variance(delays[k])
         mid = math.floor(len(delays[k]) / 2)
         delays_temp = delays[k]
         per_accounts_median[i].append(delays_temp[mid])
+        variances[i].append(variance)
         delays[k] = []  # re-initialization of the array for the next stage
 
+    with open(f"{i*10}.data", "w") as data_file:
+        for k in range(0,100):
+            data_file.write(f'{per_accounts_median[i][k]}\t{variances[i][k]}\t{math.sqrt(variances[i][k])}\n')
     process.wait()
-
-plt.plot(time, per_accounts_median[1], marker='o', label="10")
-plt.plot(time, per_accounts_median[2], marker='o', label="20")
-plt.plot(time, per_accounts_median[3], marker='o', label="30")
-plt.plot(time, per_accounts_median[4], marker='o', label="40")
-plt.plot(time, per_accounts_median[5], marker='o', label="50")
-plt.plot(time, per_accounts_median[6], marker='o', label="60")
-plt.plot(time, per_accounts_median[7], marker='o', label="70")
-plt.plot(time, per_accounts_median[8], marker='o', label="80")
-plt.plot(time, per_accounts_median[9], marker='o', label="90")
-plt.plot(time, per_accounts_median[10], marker='o', label="100")
-plt.legend(title='#acc/s writing', bbox_to_anchor=(1.05, 1.0), loc='upper left')
-plt.xlabel('number of repetition')  # rep of uploading values to blockchain
-plt.ylabel('median of delay (ms)')
-plt.title('median of delay behavior through time')
-plt.show()
