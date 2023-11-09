@@ -28,8 +28,8 @@ for line in iter(process.stdout.readline, ''):
 
 process.wait()
 
-
-with open(f"5.data", "w") as data_file:
+# set the number equal to ms of interval in bme680
+with open(f"5.data", "w") as data_file: 
     for k in range(0,20):
         data_file.write(f'{uploadDelay[k]}\n')
 process.wait()
