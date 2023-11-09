@@ -9,17 +9,17 @@ const contract = new web3.eth.Contract(configuration.abi, configuration.networks
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { seeLastValueHum, seeAvgValueHum, seeLastValueTemp, seeAvgValueTemp } = require('../server/app');
+const { seeLastValueHum } = require('../server/app');
 
 app.use(cors());
 app.use(express.json());
 let attack_iter = 0;
 
 const theInterval = setInterval(async () => {
-    if (attack_iter > 30){
+    if (attack_iter > 50){
         clearInterval(theInterval);
         return;
       }
     let tempLastValue = await seeLastValueHum(process.argv[2]);
     attack_iter++;
-}, 2000);
+}, 3000);

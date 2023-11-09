@@ -3,8 +3,8 @@ const app = express();
 const http = require('http');
 var Web3 = require('web3');
 const configuration = require('../build/contracts/Sensors.json');
-// const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-const web3 = new Web3(new Web3.providers.HttpProvider("http://block.amaxilatis.com:8545"));
+const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
+//const web3 = new Web3(new Web3.providers.HttpProvider("http://block.amaxilatis.com:8545"));
 const contract = new web3.eth.Contract(configuration.abi, configuration.networks[5777].address);
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -23,10 +23,9 @@ const tempInterval = setInterval(async () => {
     return;
   }
   let theTimeT = await addTemperatureValue(process.argv[2]);
-  // times.push(theTimeT);
   console.log(theTimeT + " " + cnt1);
   cnt1 += 1;
-} , 60000);
+} , 23000);
 
 const humInterval = setInterval(async () => {
   if (cnt2 > 99){
@@ -34,7 +33,6 @@ const humInterval = setInterval(async () => {
     return;
   }
   let theTimeH = await addHumidityValue(process.argv[2]);
-  // times.push(theTimeH);
   console.log(theTimeH + " " + cnt2);
   cnt2 += 1;
-} , 60000);
+} , 23000);

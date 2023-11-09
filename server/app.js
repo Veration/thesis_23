@@ -4,8 +4,8 @@ const http = require('http');
 const port = 8080;
 var Web3 = require('web3');
 const configuration = require('../build/contracts/Sensors.json');
-// const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-const web3 = new Web3(new Web3.providers.HttpProvider("http://block.amaxilatis.com:8545"));
+const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
+//const web3 = new Web3(new Web3.providers.HttpProvider("http://block.amaxilatis.com:8545"));
 const contract = new web3.eth.Contract(configuration.abi, configuration.networks[5777].address);
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -175,33 +175,6 @@ module.exports = {
   times,
   timeT
 };
-
-//--------------------------------------------ENDPOINTS----------------------------------------------
-
-app.get('/getLastHumidityValue', async (req, res) => {
-   try {
-    const response = await seeLastValueHum();
-    console.log(response);
-    res.json(response);
-   } catch (err) {
-     console.log(err);
-     res.status(500).json({ success: false, error: err.message });
-   }
-});
-
-app.post('/addTempValue', async (req, res) => {
-  const {temperatureValue} = req.body;
-  try {
-   const addT = await addTemperatureValue(temperatureValue);
-   res.json(addT);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-
-
 
 if (require.main === module) {
   // Server-related code that should only run when app.js is executed directly

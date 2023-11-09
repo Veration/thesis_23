@@ -15,20 +15,15 @@ const { addTemperatureValuePi, addHumidityValuePi, times } = require('../server/
 app.use(cors());
 app.use(express.json());
 
-const serverIp = 'raspberrypi.local'; // Replace with the IP address of your Raspberry Pi
-const port = 1050; // The same port number you chose on the Raspberry Pi
-
+// const serverIp = 'raspberrypi.local';
+const serverIp = '169.254.164.173';
+const port = 1050; // port that raspberry pi server runs
 const client = new net.Socket();
 
-const addPiData = async (piTemp, piHum) => {
-    let addTemp = await addTemperatureValuePi(piTemp);
-    let addHum = await addHumidityValuePi(piHum);
-    console.log("pi added data successfully");
- }
+let cnt = 0;
 
 client.connect(port, serverIp, () => {
-    console.log('Connected to server.');
-    console.log('Type "start" to start receiving data or "stop" to stop.');
+    client.write('start'); // Automatically start
 });
 
 client.on('data', data => {
@@ -36,23 +31,20 @@ client.on('data', data => {
     const parsedData = JSON.parse(jsonData);
     const temperature = parsedData.temperature;
     const humidity = parsedData.humidity;
-    
-    addPiData(temperature, humidity);
-    
-    console.log('Received data:');
-    console.log(`Temperature: ${temperature}`);
-    console.log(`Humidity: ${humidity}`);
-});
-
-client.on('close', () => {
-    console.log('Connection closed.');
-});
-
-process.stdin.on('data', input => {
-    const command = input.toString().trim();
-    if (command === 'start' || command === 'stop') {
-        client.write(command);
+    if (cnt < 20){
+        (async function () {
+            let delayT = await addTemperatureValuePi(temperature);
+            console.log(delayT);
+            let delayH = await addHumidityValuePi(temperature);
+            console.log(delayH);
+        })();
+        cnt += 1;
     } else {
-        console.log('Invalid command. Type "start" to start receiving data or "stop" to stop.');
+        client.write('stop');
+        client.end();
     }
 });
+
+// client.on('close', () => {
+//     console.log('Connection closed.');
+// });
